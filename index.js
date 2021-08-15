@@ -8,12 +8,26 @@ const c = canvas.getContext("2d");
 canvas.width = innerWidth;
 canvas.height = innerHeight;
 
+const modalEl = document.querySelector("#modalEl");
+const scoreEl = document.querySelector("#scoreEl");
+const startGameBtn = document.querySelector("#startGameBtn");
+const bigScoreEl = document.querySelector("#bigScoreEl");
+
 const x = canvas.width / 2;
 const y = canvas.height / 2;
 
-const player = new Player(x, y, 10, "white");
-const enemies = [];
-const particles = [];
+let player = new Player(x, y, 10, "white");
+let enemies = [];
+let particles = [];
+
+function init() {
+  player = new Player(x, y, 10, "white");
+  enemies = [];
+  particles = [];
+  score = 0;
+  scoreEl.innerHTML = score;
+  bigScoreEl.innerHTML = score;
+}
 
 function spawnEnemies() {
   setInterval(() => {
@@ -44,6 +58,7 @@ function spawnEnemies() {
 }
 
 let animationId;
+let score = 0;
 
 function animate() {
   animationId = requestAnimationFrame(animate);
@@ -81,6 +96,8 @@ function animate() {
     if (dist - enemy.radius - player.radius < 1) {
       // End the game
       cancelAnimationFrame(animationId);
+      modalEl.style.display = "flex";
+      bigScoreEl.innerHTML = score;
     }
 
     player.projectiles.forEach((projectile, projectileIndex) => {
@@ -105,6 +122,10 @@ function animate() {
         }
 
         if (enemy.radius - 10 > 5) {
+          // increase our score
+          score += 100;
+          scoreEl.innerHTML = score;
+
           // Shrinking effect w/ GSAP
           gsap.to(enemy, {
             radius: enemy.radius - 10,
@@ -113,6 +134,9 @@ function animate() {
             player.projectiles.splice(projectileIndex, 1);
           }, 0);
         } else {
+          // increase our score
+          score += 250;
+          scoreEl.innerHTML = score;
           setTimeout(() => {
             enemies.splice(enemyIndex, 1);
             player.projectiles.splice(projectileIndex, 1);
@@ -140,5 +164,9 @@ addEventListener("click", (event) => {
   );
 });
 
-animate();
-spawnEnemies();
+startGameBtn.addEventListener("click", (event) => {
+  init();
+  animate();
+  spawnEnemies();
+  modalEl.style.display = "none";
+});
